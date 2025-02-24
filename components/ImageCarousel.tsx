@@ -43,7 +43,7 @@ const images = [
 
 const ImageCarousel = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timer>();
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   // Create array with duplicated items for infinite scroll
   const extendedImages = [...images, ...images, ...images];
