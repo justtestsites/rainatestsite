@@ -43,29 +43,74 @@ const images = [
 
 const ImageCarousel = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const animationFrameRef = useRef<number>();
 
   // Create array with duplicated items for infinite scroll
   const extendedImages = [...images, ...images, ...images];
 
   const startAutoScroll = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
+    let lastTime = performance.now();
+    const animate = (currentTime: number) => {
+      if (!scrollRef.current || isHovered || isDragging) return;
 
-    intervalRef.current = setInterval(() => {
-      if (scrollRef.current) {
-        scrollRef.current.scrollLeft += 1.25;
-      }
-    }, 25);
-  }, []);
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+
+      scrollRef.current.scrollLeft += (1.25 * deltaTime) / 16; // Normalize to 60fps
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+  }, [isHovered, isDragging]);
+
+  // Handle mouse/touch events
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current!.offsetLeft);
+    setScrollLeft(scrollRef.current!.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    startAutoScroll();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current!.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current!.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current!.offsetLeft);
+    setScrollLeft(scrollRef.current!.scrollLeft);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    startAutoScroll();
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - scrollRef.current!.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current!.scrollLeft = scrollLeft - walk;
+  };
 
   // Start auto-scroll on mount
   useEffect(() => {
     startAutoScroll();
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
   }, [startAutoScroll]);
@@ -75,38 +120,28 @@ const ImageCarousel = () => {
     const scrollContainer = scrollRef.current;
     if (!scrollContainer) return;
 
-    // Calculate dimensions after the component has mounted
     const calculateDimensions = () => {
-      const containerWidth = scrollContainer.clientWidth;
       const totalWidth = scrollContainer.scrollWidth;
       const singleSetWidth = totalWidth / 3;
-      
-      // Set initial scroll position to the middle set
       scrollContainer.scrollLeft = singleSetWidth;
     };
 
     const handleScroll = () => {
       if (!scrollContainer) return;
       
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+      const { scrollLeft, scrollWidth } = scrollContainer;
       const singleSetWidth = scrollWidth / 3;
 
-      // When reaching the end of any set, move to the corresponding position in the middle set
       if (scrollLeft < singleSetWidth) {
-        // If in the first set, jump to the same relative position in the middle set
         const relativePosition = scrollLeft;
         scrollContainer.scrollLeft = singleSetWidth + relativePosition;
       } else if (scrollLeft > singleSetWidth * 2) {
-        // If in the last set, jump to the same relative position in the middle set
         const relativePosition = scrollLeft - singleSetWidth * 2;
         scrollContainer.scrollLeft = singleSetWidth + relativePosition;
       }
     };
 
-    // Initial setup
     calculateDimensions();
-    
-    // Add event listeners
     scrollContainer.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', calculateDimensions);
 
@@ -122,9 +157,20 @@ const ImageCarousel = () => {
         ref={scrollRef}
         className="flex overflow-x-auto select-none [&::-webkit-scrollbar]{display:none} [-ms-overflow-style:none] [scrollbar-width:none] will-change-transform"
         style={{ 
-          scrollBehavior: 'smooth',
+          scrollBehavior: 'auto',
           transform: 'translate3d(0,0,0)'
         }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          startAutoScroll();
+        }}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
       >
         {extendedImages.map((image, index) => (
           <div
