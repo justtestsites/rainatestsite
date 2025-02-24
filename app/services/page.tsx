@@ -216,22 +216,22 @@ export default function ServicesPage() {
                 >
                   {/* Text Content */}
                   <div>
-                    <div className="mb-8">
+                    <div className="mb-6 md:mb-8">
                       <div className="inline-block">
-                        <h3 className="text-4xl mb-3 font-[500] font-chronicle-display tracking-wide">{services[currentSlide].title}</h3>
+                        <h3 className="text-3xl md:text-4xl mb-3 font-[500] font-chronicle-display tracking-wide">{services[currentSlide].title}</h3>
                         <div className="h-0.5 w-full bg-gray-400"></div>
                       </div>
-                      <div className="uppercase tracking-widest text-sm font-medium text-gray-500 mt-6 mb-4">PREMIER STYLE SUPPORT</div>
-                      <p className="text-gray-800 leading-relaxed text-base">{services[currentSlide].description}</p>
+                      <div className="uppercase tracking-widest text-xs md:text-sm font-medium text-gray-500 mt-4 md:mt-6 mb-3 md:mb-4">PREMIER STYLE SUPPORT</div>
+                      <p className="text-gray-800 leading-relaxed text-sm md:text-base">{services[currentSlide].description}</p>
                     </div>
 
-                    <div className="space-y-4">
-                      <h4 className="text-xl font-serif italic">Features and Benefits:</h4>
-                      <div className="space-y-2.5">
+                    <div className="space-y-3 md:space-y-4">
+                      <h4 className="text-lg md:text-xl font-serif italic">Features and Benefits:</h4>
+                      <div className="space-y-2 md:space-y-2.5">
                         {services[currentSlide].features.map((feature) => (
                           <div key={feature} className="flex items-start">
-                            <span className="block w-1 h-1 bg-gray-400 rounded-full mt-2 mr-3" />
-                            <p className="text-gray-800 leading-relaxed text-base">{feature}</p>
+                            <span className="block w-1 h-1 bg-gray-400 rounded-full mt-1.5 md:mt-2 mr-2 md:mr-3" />
+                            <p className="text-gray-800 leading-relaxed text-sm md:text-base">{feature}</p>
                           </div>
                         ))}
                       </div>
@@ -470,7 +470,7 @@ export default function ServicesPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {packages.map((pkg, index) => (
               <motion.div
                 key={pkg.name}
@@ -478,7 +478,7 @@ export default function ServicesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
-                className="relative group h-full"
+                className="relative group h-full max-w-sm mx-auto w-full"
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-[#D4CBC0]/20 to-transparent transform group-hover:scale-105 transition-transform duration-500" />
                 <div className="bg-white p-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] hover:shadow-2xl transition-all duration-500 relative h-full flex flex-col border border-[#364846]">
